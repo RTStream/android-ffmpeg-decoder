@@ -111,8 +111,8 @@ JNIEXPORT void Java_com_dropcam_android_media_H264Decoder_nativeInit(JNIEnv* env
   ctx->codec_ctx->pix_fmt = PIX_FMT_YUV420P;
   ctx->codec_ctx->flags2 |= CODEC_FLAG2_CHUNKS;
 
-  ctx->src_frame = avcodec_alloc_frame();
-  ctx->dst_frame = avcodec_alloc_frame();
+  ctx->src_frame = av_frame_alloc();
+  ctx->dst_frame = av_frame_alloc();
 
   avcodec_open2(ctx->codec_ctx, ctx->codec, NULL);
 

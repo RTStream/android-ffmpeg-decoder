@@ -19,9 +19,9 @@ set -e
 
 NDK=~/android-ndk
 ARM_PLATFORM=$NDK/platforms/android-5/arch-arm/
-ARM_PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.6/prebuilt/darwin-x86
+ARM_PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.6/prebuilt/darwin-x86_64
 X86_PLATFORM=$NDK/platforms/android-9/arch-x86/
-X86_PREBUILT=$NDK/toolchains/x86-4.6/prebuilt/darwin-x86
+X86_PREBUILT=$NDK/toolchains/x86-4.6/prebuilt/darwin-x86_64
 function build_one
 {
 if [ $ARCH == "arm" ] 

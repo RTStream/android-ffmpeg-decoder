@@ -23,13 +23,8 @@
 
 /**
  * @file
- * @ingroup lsws
+ * @ingroup libsws
  * external API header
- */
-
-/**
- * @defgroup lsws Libswscale
- * @{
  */
 
 #include <stdint.h>
@@ -40,6 +35,9 @@
 #include "version.h"
 
 /**
+ * @defgroup libsws Color conversion and scaling
+ * @{
+ *
  * Return the LIBSWSCALE_VERSION_INT constant.
  */
 unsigned swscale_version(void);
@@ -82,6 +80,7 @@ const char *swscale_license(void);
 #define SWS_DIRECT_BGR        0x8000
 #define SWS_ACCURATE_RND      0x40000
 #define SWS_BITEXACT          0x80000
+#define SWS_ERROR_DIFFUSION  0x800000
 
 #if FF_API_SWS_CPU_CAPS
 /**
@@ -144,6 +143,13 @@ int sws_isSupportedInput(enum AVPixelFormat pix_fmt);
  * otherwise.
  */
 int sws_isSupportedOutput(enum AVPixelFormat pix_fmt);
+
+/**
+ * @param[in]  pix_fmt the pixel format
+ * @return a positive value if an endianness conversion for pix_fmt is
+ * supported, 0 otherwise.
+ */
+int sws_isSupportedEndiannessConversion(enum AVPixelFormat pix_fmt);
 
 /**
  * Allocate an empty SwsContext. This must be filled and passed to
