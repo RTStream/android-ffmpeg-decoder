@@ -21,3 +21,6 @@ local.properties
 
 # Compiled static libraries
 *.a
+jni/ffmpeg-android/
+jni/toolchain-android/
+.tags*

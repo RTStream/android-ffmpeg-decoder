@@ -61,7 +61,7 @@ echo preparing...
 --enable-parser=aac \
 --enable-muxer=mp4 \
 --pkg-config="${2}/ffmpeg-pkg-config" \
---prefix="${2}/build/${1}" \
+--prefix="${2}/ffmpeg-android/${1}" \
 --extra-cflags="-I${TOOLCHAIN_PREFIX}/include $CFLAGS" \
 --extra-ldflags="-L${TOOLCHAIN_PREFIX}/lib $LDFLAGS" \
 --extra-libs="-lm" \

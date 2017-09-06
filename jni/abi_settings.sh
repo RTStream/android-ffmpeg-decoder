@@ -2,8 +2,6 @@
 
 . settings.sh
 
-echo param '$1: ' ${1} ', $2: ' ${2} ', $3: ' $3
-
 BASEDIR=$2
 
 case $1 in

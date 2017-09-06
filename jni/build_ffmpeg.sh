@@ -16,12 +16,18 @@
 ######################################################
 
 set -e
+. settings.sh
 
 NDK=~/android-ndk
+
+BASEDIR=$(pwd)
+TOOLCHAIN_PREFIX=${BASEDIR}/toolchain-android
+
 ARM_PLATFORM=$NDK/platforms/android-5/arch-arm/
 ARM_PREBUILT=$NDK/toolchains/arm-linux-androideabi-4.6/prebuilt/darwin-x86_64
 X86_PLATFORM=$NDK/platforms/android-9/arch-x86/
 X86_PREBUILT=$NDK/toolchains/x86-4.6/prebuilt/darwin-x86_64
+
 function build_one
 {
 if [ $ARCH == "arm" ] 
@@ -36,7 +42,7 @@ else
 fi
 
 pushd ffmpeg
-./configure --target-os=linux \
+./configure --target-os=android \
     --prefix=$PREFIX \
     --enable-cross-compile \
     --extra-libs="-lgcc" \
@@ -51,26 +57,26 @@ pushd ffmpeg
     --enable-small \
     --extra-ldflags="-Wl,-rpath-link=$PLATFORM/usr/lib -L$PLATFORM/usr/lib -nostdlib -lc -lm -ldl -llog" \
     --disable-everything \
+    --enable-hwaccel=h264_mediacodec \
     --enable-decoder=h264 \
+    --enable-decoder=h264_mediacodec \
     --enable-demuxer=h264 \
     --enable-parser=h264 \
+    --enable-hwaccel=hevc_mediacodec \
+    --enable-decoder=hevc \
+    --enable-decoder=hevc_mediacodec \
+    --enable-demuxer=hevc \
+    --enable-parser=hevc \
+    --enable-decoder=aac \
+    --enable-demuxer=aac \
+    --enable-parser=aac \
+    --enable-muxer=mp4 \
     --disable-ffplay \
     --disable-ffmpeg \
     --disable-ffprobe \
     --disable-network \
     --disable-avfilter \
     --disable-avdevice \
-#    --enable-demuxer=mov \
-#    --enable-demuxer=h264 \
-#    --enable-protocol=file \
-#    --enable-avformat \
-#    --enable-avcodec \
-#    --enable-decoder=rawvideo \
-#    --enable-decoder=mjpeg \
-#    --enable-decoder=h263 \
-#    --enable-decoder=mpeg4 \
-#    --enable-decoder=h264 \
-#    --enable-parser=h264 \
 #    --enable-zlib \
     $ADDITIONAL_CONFIGURE_FLAG
 
@@ -82,12 +88,12 @@ popd
 }
 
 #arm v5te
-CPU=armv5te
-ARCH=arm
-OPTIMIZE_CFLAGS="-marm -march=$CPU"
-PREFIX=`pwd`/ffmpeg-android/$CPU 
-ADDITIONAL_CONFIGURE_FLAG=
-build_one
+# CPU=armv5te
+# ARCH=arm
+# OPTIMIZE_CFLAGS="-marm -march=$CPU"
+# PREFIX=`pwd`/ffmpeg-android/$CPU 
+# ADDITIONAL_CONFIGURE_FLAG=
+# build_one
 
 #arm v6
 #CPU=armv6
@@ -130,9 +136,9 @@ build_one
 #build_one
 
 #x86
-CPU=i686
-ARCH=i686
-OPTIMIZE_CFLAGS="-fomit-frame-pointer"
-PREFIX=`pwd`/ffmpeg-android/${CPU} 
-ADDITIONAL_CONFIGURE_FLAG=
-build_one
+# CPU=i686
+# ARCH=i686
+# OPTIMIZE_CFLAGS="-fomit-frame-pointer"
+# PREFIX=`pwd`/ffmpeg-android/${CPU} 
+# ADDITIONAL_CONFIGURE_FLAG=
+# build_one
