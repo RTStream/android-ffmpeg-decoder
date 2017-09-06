@@ -27,7 +27,7 @@
  *  
  */
 
-package com.dropcam.android.media;
+package com.decoder.util;
 
 import java.nio.ByteBuffer;
 

@@ -5,10 +5,13 @@
 pushd ffmpeg
 
 case $1 in
-  armeabi-v7a | armeabi-v7a-neon)
+  armv5te)
+    CPU='arm9'
+  ;;
+  armeabi-v7a)
     CPU='cortex-a8'
   ;;
-  x86)
+  i686)
     CPU='i686'
   ;;
 esac
@@ -33,11 +36,9 @@ echo preparing...
 --enable-version3 \
 --enable-hardcoded-tables \
 --enable-gpl \
---enable-yasm \
 --disable-doc \
 --disable-shared \
 --enable-static \
---enable-small \
 --disable-ffplay \
 --disable-ffmpeg \
 --disable-ffprobe \

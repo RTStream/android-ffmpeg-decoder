@@ -5,9 +5,12 @@ include $(CLEAR_VARS)
 LOCAL_MODULE := videodecoder
 LOCAL_SRC_FILES := h264decoder.c
 
+$(warning "the value of LOCAL_PATH is $(LOCAL_PATH)")
+$(warning "the value of TARGET_ARCH_ABI is $(TARGET_ARCH_ABI)")
+
 ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
-	LOCAL_C_INCLUDES := $(LOCAL_C_INCLUDES) $(LOCAL_PATH)/ffmpeg-android/armv7-a/include
-	LOCAL_LDFLAGS := -L$(LOCAL_PATH)/ffmpeg-android/armv7-a/lib
+	LOCAL_C_INCLUDES := $(LOCAL_C_INCLUDES) $(LOCAL_PATH)/ffmpeg-android/armeabi-v7a/include
+	LOCAL_LDFLAGS := -L$(LOCAL_PATH)/ffmpeg-android/armeabi-v7a/lib
 endif
 
 ifeq ($(TARGET_ARCH_ABI),armeabi)

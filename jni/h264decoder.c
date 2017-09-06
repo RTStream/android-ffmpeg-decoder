@@ -88,7 +88,7 @@ JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
 JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
 }
 
-JNIEXPORT void Java_com_dropcam_android_media_H264Decoder_nativeInit(JNIEnv* env, jobject thiz, jint color_format) {
+JNIEXPORT void Java_com_decoder_util_H264Decoder_nativeInit(JNIEnv* env, jobject thiz, jint color_format) {
   DecoderContext *ctx = calloc(1, sizeof(DecoderContext));
 
   D("Creating native H264 decoder context");
@@ -119,7 +119,7 @@ JNIEXPORT void Java_com_dropcam_android_media_H264Decoder_nativeInit(JNIEnv* env
   set_ctx(env, thiz, ctx);
 }
 
-JNIEXPORT void Java_com_dropcam_android_media_H264Decoder_nativeDestroy(JNIEnv* env, jobject thiz) {
+JNIEXPORT void Java_com_decoder_util_H264Decoder_nativeDestroy(JNIEnv* env, jobject thiz) {
   DecoderContext *ctx = get_ctx(env, thiz);
 
   D("Destroying native H264 decoder context");
@@ -132,7 +132,7 @@ JNIEXPORT void Java_com_dropcam_android_media_H264Decoder_nativeDestroy(JNIEnv* 
   free(ctx);
 }
 
-JNIEXPORT jint Java_com_dropcam_android_media_H264Decoder_consumeNalUnitsFromDirectBuffer(JNIEnv* env, jobject thiz, jobject nal_units, jint num_bytes, jlong pkt_pts) {
+JNIEXPORT jint Java_com_decoder_util_H264Decoder_consumeNalUnitsFromDirectBuffer(JNIEnv* env, jobject thiz, jobject nal_units, jint num_bytes, jlong pkt_pts) {
   DecoderContext *ctx = get_ctx(env, thiz);
 
   void *buf = NULL;
@@ -162,27 +162,27 @@ JNIEXPORT jint Java_com_dropcam_android_media_H264Decoder_consumeNalUnitsFromDir
   return res;
 }
 
-JNIEXPORT jboolean Java_com_dropcam_android_media_H264Decoder_isFrameReady(JNIEnv* env, jobject thiz) {
+JNIEXPORT jboolean Java_com_decoder_util_H264Decoder_isFrameReady(JNIEnv* env, jobject thiz) {
   DecoderContext *ctx = get_ctx(env, thiz);
   return ctx->frame_ready ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jint Java_com_dropcam_android_media_H264Decoder_getWidth(JNIEnv* env, jobject thiz) {
+JNIEXPORT jint Java_com_decoder_util_H264Decoder_getWidth(JNIEnv* env, jobject thiz) {
   DecoderContext *ctx = get_ctx(env, thiz);
   return ctx->codec_ctx->width;
 }
 
-JNIEXPORT jint Java_com_dropcam_android_media_H264Decoder_getHeight(JNIEnv* env, jobject thiz) {
+JNIEXPORT jint Java_com_decoder_util_H264Decoder_getHeight(JNIEnv* env, jobject thiz) {
   DecoderContext *ctx = get_ctx(env, thiz);
   return ctx->codec_ctx->height;
 }
 
-JNIEXPORT jint Java_com_dropcam_android_media_H264Decoder_getOutputByteSize(JNIEnv* env, jobject thiz) {
+JNIEXPORT jint Java_com_decoder_util_H264Decoder_getOutputByteSize(JNIEnv* env, jobject thiz) {
   DecoderContext *ctx = get_ctx(env, thiz);
   return avpicture_get_size(ctx->color_format, ctx->codec_ctx->width, ctx->codec_ctx->height);
 }
 
-JNIEXPORT jlong Java_com_dropcam_android_media_H264Decoder_decodeFrameToDirectBuffer(JNIEnv* env, jobject thiz, jobject out_buffer) {
+JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIEnv* env, jobject thiz, jobject out_buffer) {
   DecoderContext *ctx = get_ctx(env, thiz);
 
   if (!ctx->frame_ready)

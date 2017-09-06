@@ -5,22 +5,21 @@
 BASEDIR=$2
 
 case $1 in
+  armv5te)
+    NDK_ABI='arm'
+    NDK_TOOLCHAIN_ABI='arm-linux-androideabi'
+    NDK_CROSS_PREFIX="${NDK_TOOLCHAIN_ABI}"
+  ;;
   armeabi-v7a)
     NDK_ABI='arm'
     NDK_TOOLCHAIN_ABI='arm-linux-androideabi'
     NDK_CROSS_PREFIX="${NDK_TOOLCHAIN_ABI}"
   ;;
-  armeabi-v7a-neon)
-    NDK_ABI='arm'
-    NDK_TOOLCHAIN_ABI='arm-linux-androideabi'
-    NDK_CROSS_PREFIX="${NDK_TOOLCHAIN_ABI}"
-    CFLAGS="${CFLAGS} -mfpu=neon"
-  ;;
-  x86)
+  i686)
     NDK_ABI='x86'
     NDK_TOOLCHAIN_ABI='x86'
     NDK_CROSS_PREFIX="i686-linux-android"
-    CFLAGS="$CFLAGS -march=i686"
+    CFLAGS="$CFLAGS -march=i686 -fomit-frame-pointer"
   ;;
 esac
 
