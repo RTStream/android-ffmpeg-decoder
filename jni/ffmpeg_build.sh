@@ -36,6 +36,7 @@ echo preparing...
 --enable-version3 \
 --enable-hardcoded-tables \
 --enable-gpl \
+--enable-small \
 --disable-doc \
 --disable-shared \
 --enable-static \

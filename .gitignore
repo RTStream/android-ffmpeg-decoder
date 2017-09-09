@@ -24,3 +24,5 @@ local.properties
 jni/ffmpeg-android/
 jni/toolchain-android/
 .tags*
+libs/
+obj/

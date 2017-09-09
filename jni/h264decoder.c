@@ -43,6 +43,7 @@
 #define COLOR_FORMAT_YUV420 0
 #define COLOR_FORMAT_RGB565LE 1
 #define COLOR_FORMAT_BGR32 2
+#define COLOR_FORMAT_NV12 3
 
 #if DEBUG
 #  define  D(x...)  __android_log_print(ANDROID_LOG_INFO, "h264decoder", x)
@@ -60,55 +61,64 @@ typedef struct DecoderContext {
   int frame_ready;
 } DecoderContext;
 
-static void set_ctx(JNIEnv *env, jobject thiz, void *ctx) {
+static void set_ctx(JNIEnv *env, jobject thiz, void *ctx)
+{
   jclass cls = (*env)->GetObjectClass(env, thiz);
   jfieldID fid = (*env)->GetFieldID(env, cls, "cdata", "I");
   (*env)->SetIntField(env, thiz, fid, (jint)ctx);
 }
 
-static void *get_ctx(JNIEnv *env, jobject thiz) {
+static void *get_ctx(JNIEnv *env, jobject thiz)
+{
   jclass cls = (*env)->GetObjectClass(env, thiz);
   jfieldID fid = (*env)->GetFieldID(env, cls, "cdata", "I");
   return (void*)(*env)->GetIntField(env, thiz, fid);
 }
 
-static void av_log_callback(void *ptr, int level, const char *fmt, __va_list vl) {
+static void av_log_callback(void *ptr, int level, const char *fmt, __va_list vl)
+{
   static char line[1024] = {0};
   vsnprintf(line, sizeof(line), fmt, vl);
-  D(line);
+  D("%s", line);
 }
 
-JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+JNIEXPORT jint JNI_OnLoad(JavaVM *vm, void *reserved)
+{
   av_register_all();
   av_log_set_callback(av_log_callback);
 
   return JNI_VERSION_1_4;
 }
 
-JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved) {
+JNIEXPORT void JNI_OnUnload(JavaVM *vm, void *reserved)
+{
 }
 
-JNIEXPORT void Java_com_decoder_util_H264Decoder_nativeInit(JNIEnv* env, jobject thiz, jint color_format) {
+JNIEXPORT void Java_com_decoder_util_H264Decoder_nativeInit(JNIEnv* env, jobject thiz, jint color_format)
+{
   DecoderContext *ctx = calloc(1, sizeof(DecoderContext));
 
   D("Creating native H264 decoder context");
 
   switch (color_format) {
   case COLOR_FORMAT_YUV420:
-    ctx->color_format = PIX_FMT_YUV420P;
+    ctx->color_format = AV_PIX_FMT_YUV420P;
     break;
   case COLOR_FORMAT_RGB565LE:
-    ctx->color_format = PIX_FMT_RGB565LE;
+    ctx->color_format = AV_PIX_FMT_RGB565LE;
     break;
   case COLOR_FORMAT_BGR32:
-    ctx->color_format = PIX_FMT_BGR32;
+    ctx->color_format = AV_PIX_FMT_BGR32;
+    break;
+  case COLOR_FORMAT_NV12:
+    ctx->color_format = AV_PIX_FMT_NV12;
     break;
   }
 
-  ctx->codec = avcodec_find_decoder(CODEC_ID_H264);
+  ctx->codec = avcodec_find_decoder(AV_CODEC_ID_H264);
   ctx->codec_ctx = avcodec_alloc_context3(ctx->codec);
 
-  ctx->codec_ctx->pix_fmt = PIX_FMT_YUV420P;
+  ctx->codec_ctx->pix_fmt = AV_PIX_FMT_YUV420P;
   ctx->codec_ctx->flags2 |= CODEC_FLAG2_CHUNKS;
 
   ctx->src_frame = av_frame_alloc();
@@ -119,7 +129,8 @@ JNIEXPORT void Java_com_decoder_util_H264Decoder_nativeInit(JNIEnv* env, jobject
   set_ctx(env, thiz, ctx);
 }
 
-JNIEXPORT void Java_com_decoder_util_H264Decoder_nativeDestroy(JNIEnv* env, jobject thiz) {
+JNIEXPORT void Java_com_decoder_util_H264Decoder_nativeDestroy(JNIEnv* env, jobject thiz)
+{
   DecoderContext *ctx = get_ctx(env, thiz);
 
   D("Destroying native H264 decoder context");
@@ -132,14 +143,14 @@ JNIEXPORT void Java_com_decoder_util_H264Decoder_nativeDestroy(JNIEnv* env, jobj
   free(ctx);
 }
 
-JNIEXPORT jint Java_com_decoder_util_H264Decoder_consumeNalUnitsFromDirectBuffer(JNIEnv* env, jobject thiz, jobject nal_units, jint num_bytes, jlong pkt_pts) {
+JNIEXPORT jint Java_com_decoder_util_H264Decoder_consumeNalUnitsFromDirectBuffer(JNIEnv* env, jobject thiz, jobject nal_units, jint num_bytes, jlong pkt_pts)
+{
   DecoderContext *ctx = get_ctx(env, thiz);
 
   void *buf = NULL;
   if (nal_units == NULL) {
     D("Received null buffer, sending empty packet to decoder");
-  }
-  else {
+  } else {
     buf = (*env)->GetDirectBufferAddress(env, nal_units);
     if (buf == NULL) {
       D("Error getting direct buffer address");
@@ -148,9 +159,9 @@ JNIEXPORT jint Java_com_decoder_util_H264Decoder_consumeNalUnitsFromDirectBuffer
   }
 
   AVPacket packet = {
-      .data = (uint8_t*)buf,
-      .size = num_bytes,
-      .pts = pkt_pts
+    .data = (uint8_t*)buf,
+    .size = num_bytes,
+    .pts = pkt_pts
   };
 
   int frameFinished = 0;
@@ -162,29 +173,34 @@ JNIEXPORT jint Java_com_decoder_util_H264Decoder_consumeNalUnitsFromDirectBuffer
   return res;
 }
 
-JNIEXPORT jboolean Java_com_decoder_util_H264Decoder_isFrameReady(JNIEnv* env, jobject thiz) {
+JNIEXPORT jboolean Java_com_decoder_util_H264Decoder_isFrameReady(JNIEnv* env, jobject thiz)
+{
   DecoderContext *ctx = get_ctx(env, thiz);
   return ctx->frame_ready ? JNI_TRUE : JNI_FALSE;
 }
 
-JNIEXPORT jint Java_com_decoder_util_H264Decoder_getWidth(JNIEnv* env, jobject thiz) {
+JNIEXPORT jint Java_com_decoder_util_H264Decoder_getWidth(JNIEnv* env, jobject thiz)
+{
   DecoderContext *ctx = get_ctx(env, thiz);
   return ctx->codec_ctx->width;
 }
 
-JNIEXPORT jint Java_com_decoder_util_H264Decoder_getHeight(JNIEnv* env, jobject thiz) {
+JNIEXPORT jint Java_com_decoder_util_H264Decoder_getHeight(JNIEnv* env, jobject thiz)
+{
   DecoderContext *ctx = get_ctx(env, thiz);
   return ctx->codec_ctx->height;
 }
 
-JNIEXPORT jint Java_com_decoder_util_H264Decoder_getOutputByteSize(JNIEnv* env, jobject thiz) {
+JNIEXPORT jint Java_com_decoder_util_H264Decoder_getOutputByteSize(JNIEnv* env, jobject thiz)
+{
   DecoderContext *ctx = get_ctx(env, thiz);
   return avpicture_get_size(ctx->color_format, ctx->codec_ctx->width, ctx->codec_ctx->height);
 }
 
-JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIEnv* env, jobject thiz, jobject out_buffer) {
+JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIEnv* env, jobject thiz, jobject out_buffer)
+{
   DecoderContext *ctx = get_ctx(env, thiz);
-
+#if 1
   if (!ctx->frame_ready)
     return -1;
 
@@ -195,8 +211,10 @@ JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIE
   }
 
   long out_buf_len = (*env)->GetDirectBufferCapacity(env, out_buffer);
+  D("out_buf_len= %d", out_buf_len);
 
   int pic_buf_size = avpicture_get_size(ctx->color_format, ctx->codec_ctx->width, ctx->codec_ctx->height);
+  D("pic_buf_size= %d", pic_buf_size);
 
   if (out_buf_len < pic_buf_size) {
     D("Input buffer too small");
@@ -204,19 +222,20 @@ JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIE
   }
 
   if (ctx->color_format == COLOR_FORMAT_YUV420) {
+    D("before memcpy...");
     memcpy(ctx->src_frame->data, out_buffer, pic_buf_size);
-  }
-  else {
+    D("after memcpy...");
+  } else {
     if (ctx->convert_ctx == NULL) {
       ctx->convert_ctx = sws_getContext(ctx->codec_ctx->width, ctx->codec_ctx->height, ctx->codec_ctx->pix_fmt,
-          ctx->codec_ctx->width, ctx->codec_ctx->height, ctx->color_format, SWS_FAST_BILINEAR, NULL, NULL, NULL);
+                                        ctx->codec_ctx->width, ctx->codec_ctx->height, ctx->color_format, SWS_FAST_BILINEAR, NULL, NULL, NULL);
     }
 
     avpicture_fill((AVPicture*)ctx->dst_frame, (uint8_t*)out_buf, ctx->color_format, ctx->codec_ctx->width,
-        ctx->codec_ctx->height);
+                   ctx->codec_ctx->height);
 
     sws_scale(ctx->convert_ctx, (const uint8_t**)ctx->src_frame->data, ctx->src_frame->linesize, 0, ctx->codec_ctx->height,
-        ctx->dst_frame->data, ctx->dst_frame->linesize);
+              ctx->dst_frame->data, ctx->dst_frame->linesize);
   }
 
   ctx->frame_ready = 0;
@@ -226,5 +245,27 @@ JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIE
   }
 
   return ctx->src_frame->pkt_pts;
+#else
+  if (!ctx->frame_ready)
+    return -1;
+
+  void *out_buf = (*env)->GetDirectBufferAddress(env, out_buffer);
+  if (out_buf == NULL) {
+    D("Error getting direct buffer address");
+    return -1;
+  }
+
+  long out_buf_len = (*env)->GetDirectBufferCapacity(env, out_buffer);
+  int pic_buf_size = avpicture_get_size(ctx->color_format, ctx->codec_ctx->width, ctx->codec_ctx->height);
+
+  if (out_buf_len < pic_buf_size) {
+    D("Input buffer too small");
+    return -1;
+  }
+
+  memcpy(ctx->src_frame->data, out_buffer, 10);
+
+  return 0;
+#endif
 }
 

@@ -14,6 +14,7 @@ case $1 in
     NDK_ABI='arm'
     NDK_TOOLCHAIN_ABI='arm-linux-androideabi'
     NDK_CROSS_PREFIX="${NDK_TOOLCHAIN_ABI}"
+    CFLAGS="$CFLAGS -mfloat-abi=softfp -mfpu=vfpv3-d16 -marm -march=armv7-a -D__ANDROID_API__=$ANDROID_API_VERSION"
   ;;
   i686)
     NDK_ABI='x86'
@@ -33,7 +34,7 @@ NDK_SYSROOT=${TOOLCHAIN_PREFIX}/sysroot
 export PKG_CONFIG_LIBDIR="${TOOLCHAIN_PREFIX}/lib/pkgconfig"
 
 if [ $3 == 1 ]; then
-  export CC="${CROSS_PREFIX}gcc --sysroot=${NDK_SYSROOT}"
+  export CC="${CROSS_PREFIX}clang --sysroot=${NDK_SYSROOT}"
   export LD="${CROSS_PREFIX}ld"
   export RANLIB="${CROSS_PREFIX}ranlib"
   export STRIP="${CROSS_PREFIX}strip"
@@ -42,7 +43,7 @@ if [ $3 == 1 ]; then
   export ADDR2LINE="${CROSS_PREFIX}addr2line"
   export AR="${CROSS_PREFIX}ar"
   export AS="${CROSS_PREFIX}as"
-  export CXX="${CROSS_PREFIX}g++"
+  export CXX="${CROSS_PREFIX}clang++"
   export OBJCOPY="${CROSS_PREFIX}objcopy"
   export ELFEDIT="${CROSS_PREFIX}elfedit"
   export CPP="${CROSS_PREFIX}cpp"
