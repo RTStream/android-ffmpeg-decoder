@@ -200,7 +200,7 @@ JNIEXPORT jint Java_com_decoder_util_H264Decoder_getOutputByteSize(JNIEnv* env, 
 JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIEnv* env, jobject thiz, jobject out_buffer)
 {
   DecoderContext *ctx = get_ctx(env, thiz);
-#if 1
+
   if (!ctx->frame_ready)
     return -1;
 
@@ -221,10 +221,8 @@ JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIE
     return -1;
   }
 
-  if (ctx->color_format == COLOR_FORMAT_YUV420) {
-    D("before memcpy...");
+  if (0/*ctx->color_format == COLOR_FORMAT_YUV420*/) {
     memcpy(ctx->src_frame->data, out_buffer, pic_buf_size);
-    D("after memcpy...");
   } else {
     if (ctx->convert_ctx == NULL) {
       ctx->convert_ctx = sws_getContext(ctx->codec_ctx->width, ctx->codec_ctx->height, ctx->codec_ctx->pix_fmt,
@@ -245,27 +243,5 @@ JNIEXPORT jlong Java_com_decoder_util_H264Decoder_decodeFrameToDirectBuffer(JNIE
   }
 
   return ctx->src_frame->pkt_pts;
-#else
-  if (!ctx->frame_ready)
-    return -1;
-
-  void *out_buf = (*env)->GetDirectBufferAddress(env, out_buffer);
-  if (out_buf == NULL) {
-    D("Error getting direct buffer address");
-    return -1;
-  }
-
-  long out_buf_len = (*env)->GetDirectBufferCapacity(env, out_buffer);
-  int pic_buf_size = avpicture_get_size(ctx->color_format, ctx->codec_ctx->width, ctx->codec_ctx->height);
-
-  if (out_buf_len < pic_buf_size) {
-    D("Input buffer too small");
-    return -1;
-  }
-
-  memcpy(ctx->src_frame->data, out_buffer, 10);
-
-  return 0;
-#endif
 }
 
